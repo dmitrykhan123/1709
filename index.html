@@ -1,0 +1,2445 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Горожане и спорт — квантовый мониторинг соцсетей</title>
+<meta name="description" content="Пример раскладки квантового дашборда инвертов для мониторинга соцсетей: потребительские настроения, спрос на спортивную инфраструктуру, удовлетворённость районными событиями, доступность информации.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400;1,9..144,500&family=Geist:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0E0F11;
+  --surface: #16181C;
+  --surface-2: #1B1E23;
+  --surface-3: #21242A;
+  --border: rgba(232, 227, 216, 0.07);
+  --border-strong: rgba(232, 227, 216, 0.14);
+  --text: #E8E3D8;
+  --text-2: #9C9890;
+  --text-3: #5F5C57;
+
+  /* Палитра паспорта */
+  --c1: #3FA890;  /* бирюзовый — federated, мицелий */
+  --c2: #6B8FA6;  /* синий — slow integration */
+  --c3: #CB7456;  /* коралл — polarized */
+  --c4: #C49A4F;  /* золото — vertical, kairos */
+  --c5: #B97584;  /* розово-серый — frozen */
+
+  /* Семантические для миров (INV-01) */
+  --w-m1: var(--c3);
+  --w-m2: var(--c1);
+  --w-m3: var(--c4);
+  --w-m4: var(--c2);
+  --w-m5: var(--c5);
+
+  --kintsugi: var(--c4);
+  --reflexive: #9970B5;
+
+  --display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --sans: 'Geist', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'Menlo', monospace;
+
+  --max: 1280px;
+  --pad-x: clamp(20px, 4vw, 56px);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse at 70% 20%, rgba(196, 154, 79, 0.04), transparent 55%),
+    radial-gradient(ellipse at 15% 80%, rgba(63, 168, 144, 0.035), transparent 50%),
+    radial-gradient(ellipse at 90% 95%, rgba(153, 112, 181, 0.03), transparent 50%);
+  z-index: 0;
+}
+
+::selection { background: var(--kintsugi); color: var(--bg); }
+
+/* ─────────────── Топбар ─────────────── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px var(--pad-x);
+  background: rgba(14, 15, 17, 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 0.5px solid var(--border);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+}
+.brand {
+  display: flex; align-items: center; gap: 12px;
+  text-transform: uppercase;
+  color: var(--text);
+  font-weight: 500;
+}
+.brand .glyph {
+  width: 20px; height: 20px;
+  position: relative;
+  display: inline-block;
+}
+.brand .glyph::before {
+  content: ""; position: absolute;
+  inset: 0;
+  border: 1px solid var(--kintsugi);
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: superpos-1 3.6s ease-in-out infinite;
+}
+.brand .glyph::after {
+  content: ""; position: absolute;
+  inset: 0;
+  border: 1px solid var(--c1);
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: superpos-2 3.6s ease-in-out infinite;
+}
+@keyframes superpos-1 {
+  0%, 100% { transform: scale(1) translateX(-2px); opacity: 0.6; }
+  50% { transform: scale(0.7) translateX(0); opacity: 0.2; }
+}
+@keyframes superpos-2 {
+  0%, 100% { transform: scale(1) translateX(2px); opacity: 0.6; }
+  50% { transform: scale(0.7) translateX(0); opacity: 0.2; }
+}
+.topbar-meta { display: flex; align-items: center; gap: 24px; }
+.topbar-meta span { white-space: nowrap; }
+.topbar-meta a { color: var(--kintsugi); text-decoration: none; white-space: nowrap; }
+.topbar-meta a:hover { color: var(--text); }
+@media (max-width: 720px) {
+  .topbar-meta .hide-mobile { display: none; }
+}
+
+main {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--pad-x);
+  position: relative;
+  z-index: 1;
+}
+
+/* ─────────────── Hero ─────────────── */
+.hero {
+  padding: 130px 0 72px;
+  border-bottom: 0.5px solid var(--border);
+  position: relative;
+}
+.hero-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--kintsugi);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-tag::before {
+  content: ""; width: 24px; height: 1px; background: var(--kintsugi);
+}
+.hero h1 {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(36px, 6.4vw, 78px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin-bottom: 22px;
+  font-variation-settings: "opsz" 144;
+}
+.hero h1 em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--kintsugi);
+}
+.hero-lede {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(17px, 1.8vw, 21px);
+  line-height: 1.55;
+  color: var(--text-2);
+  max-width: 760px;
+  font-variation-settings: "opsz" 24;
+}
+
+/* Перекидной мост между парадигмами */
+.paradigm-shift {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap: 0;
+  border-top: 0.5px solid var(--border);
+  border-bottom: 0.5px solid var(--border);
+  font-size: 13px;
+}
+.paradigm-shift > div {
+  padding: 18px 24px 18px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.paradigm-shift .arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--kintsugi);
+  padding: 0;
+}
+.paradigm-shift .from { padding-right: 24px; }
+.paradigm-shift .to {
+  border-left: 0.5px solid var(--border);
+  padding-left: 24px;
+}
+.paradigm-shift .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.paradigm-shift .from .label { color: var(--text-3); }
+.paradigm-shift .to .label { color: var(--kintsugi); }
+.paradigm-shift .text {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-variation-settings: "opsz" 24;
+}
+.paradigm-shift .text em {
+  font-style: italic;
+  color: var(--text-2);
+}
+@media (max-width: 720px) {
+  .paradigm-shift {
+    grid-template-columns: 1fr;
+  }
+  .paradigm-shift .arrow { padding: 0 0 12px; transform: rotate(90deg); }
+  .paradigm-shift .to { border-left: none; border-top: 0.5px solid var(--border); padding-top: 18px; padding-left: 0; }
+  .paradigm-shift .from { padding-right: 0; padding-bottom: 18px; }
+}
+
+/* ─────────────── Секции ─────────────── */
+.section {
+  padding: 80px 0;
+  border-bottom: 0.5px solid var(--border);
+  position: relative;
+}
+.section-head {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 36px;
+  margin-bottom: 44px;
+  align-items: baseline;
+}
+.section-num {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 64px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variation-settings: "opsz" 144;
+  color: var(--accent, var(--text-2));
+}
+.section[data-layer="wave"] { --accent: var(--c4); }
+.section[data-layer="nodes"] { --accent: var(--c3); }
+.section[data-layer="substrate"] { --accent: var(--c1); }
+.section[data-layer="reflexivity"] { --accent: var(--reflexive); }
+
+.section-head h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(24px, 2.8vw, 36px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin-bottom: 12px;
+  font-variation-settings: "opsz" 60;
+}
+.section-head h2 em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+.section-head .h2-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.section-head p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-2);
+  max-width: 720px;
+}
+
+@media (max-width: 720px) {
+  .section-head { grid-template-columns: 1fr; gap: 14px; }
+  .section-num { font-size: 48px; }
+  .section { padding: 56px 0; }
+}
+
+/* ─────────────── Объект инверта (карточка-шапка) ─────────────── */
+.invert-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 26px 20px;
+  margin-bottom: 28px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: center;
+}
+.invert-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.invert-card .id-line {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c3);
+}
+.invert-card .name {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-variation-settings: "opsz" 36;
+}
+.invert-card .ent-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--display);
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--kintsugi);
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 60;
+}
+.invert-card .ent-readout small {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+
+/* ─────────────── Layer 01: Волновая функция ─────────────── */
+.wave-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+}
+@media (max-width: 980px) {
+  .wave-grid { grid-template-columns: 1fr; }
+}
+
+.world-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.world-item {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-left: 2px solid var(--world-color, var(--text-3));
+  border-radius: 8px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: background 0.2s var(--ease);
+  cursor: default;
+}
+.world-item:hover {
+  background: var(--surface-2);
+}
+.world-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.world-id {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--world-color, var(--text-2));
+  text-transform: uppercase;
+}
+.world-prob {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--world-color, var(--text));
+  letter-spacing: -0.01em;
+  font-variation-settings: "opsz" 36;
+}
+.world-prob small {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-left: 2px;
+  font-weight: 300;
+}
+.world-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--text);
+  font-variation-settings: "opsz" 24;
+}
+.world-desc {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.55;
+}
+.world-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+.world-trend.up { color: var(--c1); }
+.world-trend.down { color: var(--c5); }
+.world-trend.flat { color: var(--text-3); }
+
+.wave-stage {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 18px 14px;
+  position: relative;
+}
+.wave-stage-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.wave-stage-head h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 17px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  font-variation-settings: "opsz" 24;
+}
+.wave-stage-head .sublabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+.wave-stage-head .right {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wave-stage-head .right b { color: var(--kintsugi); font-weight: 500; }
+
+.wave-svg {
+  width: 100%;
+  height: 320px;
+  display: block;
+}
+
+/* Обязывающие осколки — отдельная полоса под графиком */
+.binding-shards {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--border);
+}
+.binding-shards-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.binding-shards-head h4 {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text);
+  font-variation-settings: "opsz" 14;
+}
+.binding-shards-head .meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.binding-shards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.binding-shard-row {
+  display: grid;
+  grid-template-columns: 80px 100px 1fr auto;
+  gap: 14px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: 6px;
+  font-size: 12px;
+  align-items: center;
+  border-left: 2px solid var(--shard-color, var(--c3));
+}
+.binding-shard-row .ts {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+}
+.binding-shard-row .actor {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 500;
+}
+.binding-shard-row .desc {
+  color: var(--text);
+  line-height: 1.4;
+}
+.binding-shard-row .impact {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--shard-color, var(--c3));
+  text-align: right;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .binding-shard-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* ─────────────── Layer 02: Сеть узлов ─────────────── */
+.nodes-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 16px;
+}
+@media (max-width: 980px) {
+  .nodes-grid { grid-template-columns: 1fr; }
+}
+
+.network-stage {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  position: relative;
+}
+.network-svg {
+  width: 100%;
+  height: 460px;
+  display: block;
+}
+
+.network-svg .node-circle {
+  cursor: pointer;
+  transition: stroke-width 0.2s, opacity 0.2s;
+}
+.network-svg .node-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  fill: var(--text);
+  pointer-events: none;
+}
+.network-svg .node-sublabel {
+  font-family: var(--mono);
+  font-size: 8px;
+  fill: var(--text-3);
+  pointer-events: none;
+}
+.network-svg .edge-line {
+  pointer-events: none;
+}
+.network-svg .edge-line.coalesce {
+  stroke-dasharray: 0;
+}
+.network-svg .edge-line.tension {
+  stroke-dasharray: 3 4;
+}
+
+.legend-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.legend-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px 12px;
+}
+.legend-card h4 {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--text);
+}
+.legend-row .dot-label {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.legend-row .dot-label.ring {
+  background: transparent;
+  border: 1px solid currentColor;
+}
+.legend-row .dot-label.ring-dashed {
+  background: transparent;
+  border: 1px dashed currentColor;
+}
+.legend-row .lbl-text {
+  flex: 1;
+  line-height: 1.3;
+}
+.legend-row .lbl-text small {
+  display: block;
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: var(--mono);
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+}
+
+.tip-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+.tip-card .tip-head {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c3);
+  margin-bottom: 8px;
+}
+.tip-card em {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--text);
+  font-size: 13px;
+}
+
+/* ─────────────── Layer 03: Субстрат / мицелий ─────────────── */
+.substrate-stage {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.substrate-svg {
+  width: 100%;
+  height: 360px;
+  display: block;
+}
+
+.substrate-list {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 10px;
+}
+.substrate-card {
+  background: var(--surface-2);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  border-left: 2px solid var(--sub-color, var(--c1));
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.substrate-card .sub-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.substrate-card .sub-id {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--sub-color, var(--c1));
+  text-transform: uppercase;
+}
+.substrate-card .sub-depth {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 18px;
+  color: var(--sub-color, var(--c1));
+  letter-spacing: -0.01em;
+  font-variation-settings: "opsz" 24;
+}
+.substrate-card .sub-depth small {
+  font-size: 10px;
+  color: var(--text-3);
+  margin-left: 2px;
+  font-weight: 300;
+}
+.substrate-card .sub-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--text);
+  font-variation-settings: "opsz" 18;
+}
+.substrate-card .sub-arrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.05em;
+}
+.substrate-card .sub-arrow b {
+  color: var(--sub-color, var(--c1));
+  font-weight: 500;
+}
+.substrate-card .sub-grow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-2);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.substrate-card .sub-grow.fast { color: var(--c1); }
+
+/* ─────────────── Layer 04: Рефлексия ─────────────── */
+.reflexivity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 880px) {
+  .reflexivity-grid { grid-template-columns: 1fr; }
+}
+
+.refl-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 24px 20px;
+  position: relative;
+}
+.refl-card.mirror {
+  border-color: rgba(153, 112, 181, 0.25);
+  background: linear-gradient(180deg, rgba(153, 112, 181, 0.05), transparent 80%);
+}
+.refl-card .refl-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--reflexive);
+  margin-bottom: 10px;
+}
+.refl-card h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  font-variation-settings: "opsz" 30;
+  margin-bottom: 16px;
+}
+.refl-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.refl-meter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.refl-meter-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.refl-meter-value {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 17px;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  font-variation-settings: "opsz" 24;
+}
+.refl-meter-value.warn { color: var(--c4); }
+.refl-meter-bar {
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+.refl-meter-bar-fill {
+  height: 100%;
+  background: var(--reflexive);
+  border-radius: 3px;
+}
+.refl-meter-bar-fill.kintsugi { background: var(--kintsugi); }
+.refl-meter-bar-fill.warm { background: var(--c3); }
+.refl-meter-note {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.5;
+  font-style: italic;
+  font-family: var(--display);
+  font-weight: 300;
+  font-variation-settings: "opsz" 14;
+}
+
+.lever-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.lever-cell {
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 12px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 0.5px solid var(--border);
+  position: relative;
+  cursor: default;
+  transition: background 0.2s, border-color 0.2s;
+}
+.lever-cell:hover {
+  background: var(--surface-3);
+}
+.lever-cell.recommended {
+  background: linear-gradient(180deg, rgba(196, 154, 79, 0.1), transparent);
+  border-color: rgba(196, 154, 79, 0.3);
+}
+.lever-cell .lever-num {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--text-3);
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 60;
+}
+.lever-cell.recommended .lever-num {
+  color: var(--kintsugi);
+}
+.lever-cell .lever-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text);
+  font-variation-settings: "opsz" 18;
+  margin-top: 4px;
+}
+.lever-cell .lever-desc {
+  font-size: 11px;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+.lever-cell .lever-pill {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  background: rgba(196, 154, 79, 0.18);
+  color: var(--kintsugi);
+  border-radius: 999px;
+  margin-top: 6px;
+  align-self: flex-start;
+}
+.lever-cell.not-recommended .lever-pill { display: none; }
+@media (max-width: 720px) {
+  .lever-grid { grid-template-columns: 1fr; }
+}
+
+.refl-recommendation {
+  margin-top: 8px;
+  padding: 16px 18px;
+  background: rgba(196, 154, 79, 0.06);
+  border: 0.5px solid rgba(196, 154, 79, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.refl-recommendation strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kintsugi);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.refl-recommendation em {
+  font-style: italic;
+  font-family: var(--display);
+  color: var(--kintsugi);
+  font-weight: 400;
+}
+
+/* Каунтерфакт-визуализация */
+.counterfact-svg {
+  width: 100%;
+  height: 130px;
+  display: block;
+  margin: 6px 0 14px;
+}
+
+/* ─────────────── Подвал ─────────────── */
+footer {
+  padding: 64px var(--pad-x) 56px;
+  border-top: 0.5px solid var(--border);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+  max-width: var(--max);
+  margin: 0 auto;
+}
+.foot-meta { display: flex; flex-direction: column; gap: 4px; }
+.foot-version {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 22px;
+  color: var(--text-2);
+  font-variation-settings: "opsz" 36;
+}
+
+.tooltip {
+  position: fixed;
+  background: var(--surface-3);
+  border: 0.5px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+  max-width: 280px;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.15s;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.tooltip.visible { opacity: 1; }
+.tooltip .tt-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+.tooltip .tt-strong {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+  font-variation-settings: "opsz" 18;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* Анимация органического дыхания для субстрата */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.015); }
+}
+.substrate-svg .organism { transform-origin: center; animation: breathe 9s ease-in-out infinite; }
+.substrate-svg .organism.delay-1 { animation-delay: 1.5s; }
+.substrate-svg .organism.delay-2 { animation-delay: 3s; }
+.substrate-svg .organism.delay-3 { animation-delay: 4.5s; }
+
+/* Пульсация для коллапса в волновой функции */
+@keyframes wave-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.wave-svg .now-line { animation: wave-pulse 3.4s ease-in-out infinite; }
+
+/* ─────────────── Пример: соцсети · городской спорт ─────────────── */
+/* Палитра миров перешагована под тёмную поверхность: прошла validate_palette (dark, #16181C) */
+:root {
+  --c1: #2FA88A;
+  --c2: #4F8FD0;
+  --c3: #D0714F;
+  --c4: #B8893A;
+  --c5: #C565A0;
+
+  /* Последовательная шкала дефицита: один тон, тёмный → светлый = мало → много */
+  --heat-1: #7A4535;
+  --heat-2: #9A553D;
+  --heat-3: #BD6849;
+  --heat-4: #D98060;
+  --heat-5: #F2A585;
+}
+.section[data-layer="pulse"] { --accent: var(--text-2); }
+.section[data-layer="demand"] { --accent: var(--c3); }
+.section[data-layer="events"] { --accent: var(--c2); }
+.section[data-layer="info"] { --accent: var(--c5); }
+
+.topbar-meta a { color: var(--kintsugi); text-decoration: none; white-space: nowrap; }
+.topbar-meta a:hover { color: var(--text); }
+
+/* значения — в текстовых чернилах, цвет несёт только метка рядом */
+.world-prob { color: var(--text); }
+.wave-svg { height: auto; aspect-ratio: 920 / 320; }
+.network-svg { height: auto; aspect-ratio: 720 / 460; }
+
+.panel {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px 16px;
+}
+.panel h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 17px;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  font-variation-settings: "opsz" 24;
+}
+.panel .sublabel {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin: 2px 0 14px;
+}
+.duo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+@media (max-width: 880px) { .duo-grid { grid-template-columns: 1fr; } }
+
+/* Пульс */
+.pulse-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+@media (max-width: 980px) { .pulse-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .pulse-grid { grid-template-columns: 1fr; } }
+.kpi-tile {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.2s var(--ease);
+}
+.kpi-tile:hover { background: var(--surface-2); }
+.kpi-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.kpi-label .sw { width: 8px; height: 8px; border-radius: 2px; background: var(--kpi-color); flex-shrink: 0; }
+.kpi-value {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 36px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  font-variation-settings: "opsz" 60;
+}
+.kpi-value small { font-size: 14px; color: var(--text-3); margin-left: 2px; }
+.kpi-delta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em; color: var(--text-2); }
+.kpi-note { font-size: 12px; line-height: 1.45; color: var(--text-2); }
+.kpi-spark { width: 100%; height: auto; aspect-ratio: 240 / 40; display: block; margin-top: 4px; }
+
+/* Горизонтальные бары */
+.bar-list { display: flex; flex-direction: column; gap: 9px; }
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 44%) 1fr 58px;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text);
+}
+.bar-label { line-height: 1.3; }
+.bar-track { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
+.bar-fill { display: block; height: 100%; border-radius: 0 4px 4px 0; }
+.bar-val { font-family: var(--mono); font-size: 11px; color: var(--text); text-align: right; }
+
+/* Тепловая карта спроса */
+.demand-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+}
+@media (max-width: 980px) { .demand-grid { grid-template-columns: 1fr; } }
+.heat-wrap { overflow-x: auto; }
+table.heat {
+  border-collapse: separate;
+  border-spacing: 2px;
+  width: 100%;
+  min-width: 640px;
+  font-size: 12px;
+}
+table.heat th {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 4px 4px 8px;
+  text-align: center;
+  vertical-align: bottom;
+}
+table.heat th.row {
+  text-align: left;
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+  white-space: nowrap;
+  padding: 0 10px 0 0;
+  vertical-align: middle;
+}
+table.heat td.cell {
+  height: 38px;
+  text-align: center;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: default;
+}
+table.heat td.cell:hover { outline: 1.5px solid var(--text); outline-offset: -1.5px; }
+table.heat td.vol {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-2);
+  text-align: right;
+  padding-left: 10px;
+  white-space: nowrap;
+}
+.heat-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  flex-wrap: wrap;
+}
+.heat-legend .steps { display: flex; gap: 2px; }
+.heat-legend .steps span { width: 30px; height: 10px; border-radius: 2px; }
+.quote-list { display: flex; flex-direction: column; gap: 14px; }
+.quote {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+  border-left: 2px solid var(--c3);
+  padding-left: 12px;
+  font-variation-settings: "opsz" 18;
+}
+.quote small {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* События */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+.event-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.event-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.event-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.event-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--text);
+  margin-top: 3px;
+  font-variation-settings: "opsz" 24;
+}
+.event-csat {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--text);
+  white-space: nowrap;
+  font-variation-settings: "opsz" 36;
+}
+.event-csat small { font-size: 12px; color: var(--text-3); }
+.event-spark { width: 100%; height: auto; aspect-ratio: 300 / 84; display: block; }
+.event-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.event-metric { background: var(--surface-2); border-radius: 6px; padding: 6px 8px; }
+.event-metric .m-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.event-metric .m-val { font-family: var(--mono); font-size: 12px; color: var(--text); }
+.event-notes { font-size: 12px; line-height: 1.5; color: var(--text-2); }
+.event-notes b { font-weight: 500; color: var(--text); }
+
+/* Доступность информации */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+}
+@media (max-width: 980px) { .info-grid { grid-template-columns: 1fr; } }
+.info-side { display: flex; flex-direction: column; gap: 12px; }
+/* в узкой колонке подпись — над баром */
+.info-side .bar-row { grid-template-columns: 1fr 58px; row-gap: 4px; }
+.info-side .bar-label { grid-column: 1 / -1; }
+
+/* Тренды предпочтений */
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 10px;
+}
+.trend-card .sub-spark { width: 100%; height: auto; aspect-ratio: 240 / 40; display: block; margin: 4px 0 2px; }
+.trend-card .sub-depth { color: var(--text); }
+
+.callout {
+  margin-top: 16px;
+  padding: 16px 18px;
+  background: rgba(79, 143, 208, 0.06);
+  border: 0.5px solid rgba(79, 143, 208, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.callout strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c2);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.ethics-list { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.5; color: var(--text-2); }
+.ethics-list li { padding-left: 16px; position: relative; }
+.ethics-list li::before { content: "—"; position: absolute; left: 0; color: var(--reflexive); }
+.ethics-list b { color: var(--text); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="glyph"></span>
+    Семантический движок · Кв. инверты
+  </div>
+  <div class="topbar-meta">
+    <span class="hide-mobile">v 0.5 · пример: соцсети</span>
+    <a class="hide-mobile" href="/inverts-quantum">← основной кейс</a>
+    <a class="hide-mobile" href="/inverts-quantum-social-deck.pdf" download>PDF ↓</a>
+    <span>INV-CT-01 · CITY-SPORT</span>
+  </div>
+</div>
+
+<main>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero fade-in">
+  <div class="hero-tag">Дашборд II · пример раскладки · мониторинг соцсетей</div>
+  <h1>Город в <em>суперпозиции</em>:<br>как жители выбирают спорт</h1>
+  <p class="hero-lede">Квантовая раскладка, приложенная к слушанию соцсетей. Настроение горожан — не одна цифра «довольны на 62%», а распределение по сценариям того, куда уходят их деньги, время и ожидания от спорта. Осколки — посты, отзывы и вопросы в районных чатах; обязывающие осколки — действия: подписи, регистрации, отказы от абонементов. Четыре вопроса к городу: что с тратами, чего не хватает рядом с домом, как прошли районные события и дошла ли до людей информация.</p>
+
+  <div class="paradigm-shift">
+    <div class="from">
+      <span class="label">Раньше · опрос раз в год</span>
+      <span class="text">Удовлетворённость — строка в годовом отчёте. <em>О провале события узнаём через квартал, когда уже поздно что-то менять.</em></span>
+    </div>
+    <div class="arrow">→</div>
+    <div class="to">
+      <span class="label">Сейчас · непрерывное слушание</span>
+      <span class="text">Настроение — распределение по мирам. <em>Отклик виден в первые 48 часов, и следующее событие успевает стать лучше.</em></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ INVERT CARD ============================ -->
+<section style="padding-top: 40px;" class="fade-in">
+  <div class="invert-card">
+    <div class="invert-card-text">
+      <span class="id-line">INV-CT-01 · CITY-SPORT · 28 ДНЕЙ В НАБЛЮДЕНИИ · 8 РАЙОНОВ · ≈ 11 000 УПОМИНАНИЙ/НЕД</span>
+      <span class="name">Спрос горожан на спорт: от абонемента в клуб — к двору, парку и районному событию</span>
+    </div>
+    <div class="ent-readout">
+      <small>энтропия миров</small>
+      2.23<small>/2.32 бит</small>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 00: PULSE ============================ -->
+<section class="section fade-in" data-layer="pulse">
+  <div class="section-head">
+    <div class="section-num">00</div>
+    <div>
+      <div class="h2-meta">Пульс · четыре вопроса к городу</div>
+      <h2>Короткий ответ — <em>на одном экране</em></h2>
+      <p>По индикатору на каждый вопрос, линия — последние 28 дней. Клик по плитке ведёт в слой, где индикатор раскладывается на миры, районы, события и каналы.</p>
+    </div>
+  </div>
+  <div class="pulse-grid" id="pulseGrid"></div>
+</section>
+
+<!-- ============================ 01: CONSUMER — WAVE ============================ -->
+<section class="section fade-in" data-layer="wave" id="consumer">
+  <div class="section-head">
+    <div class="section-num">01</div>
+    <div>
+      <div class="h2-meta">Потребительские настроения · волновая функция</div>
+      <h2>Куда уходят <em>деньги и время</em> на спорт</h2>
+      <p>Пять сценариев того, как горожане распределяют бюджет на спорт. Вероятность мира — доля упоминаний, которые классификатор относит к этой модели поведения, с поправкой на действия. Левее «сейчас» — наблюдение, правее — прогноз. Точки сверху — обязывающие осколки: не слова, а поступки, сдвинувшие распределение.</p>
+    </div>
+  </div>
+
+  <div class="wave-grid">
+    <div class="world-list" id="worldList"></div>
+
+    <div class="wave-stage">
+      <div class="wave-stage-head">
+        <div>
+          <h3>Амплитуды миров потребления</h3>
+          <div class="sublabel">−28 дн … сейчас … +28 дн (прогноз)</div>
+        </div>
+        <div class="right">
+          Лидер: <b>M1 · 4 нед роста подряд</b><br>
+          Падение энтропии: <b>−0.02/нед</b>
+        </div>
+      </div>
+      <svg class="wave-svg" id="waveSvg" viewBox="0 0 920 320" role="img" aria-label="Доли пяти миров потребления во времени"></svg>
+
+      <div class="binding-shards">
+        <div class="binding-shards-head">
+          <h4>Действия вместо слов</h4>
+          <span class="meta">— обязывающие осколки из соцсетей и агрегатов</span>
+        </div>
+        <div class="binding-shards-list" id="bindingShardsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="duo-grid">
+    <div class="panel">
+      <h3>Эмоции в упоминаниях трат на спорт</h3>
+      <div class="sublabel">доля упоминаний · 28 дн</div>
+      <div class="bar-list" id="emotionBars"></div>
+    </div>
+    <div class="panel">
+      <h3>О чём говорят, когда говорят о деньгах</h3>
+      <div class="sublabel">темы · доля упоминаний с денежным мотивом</div>
+      <div class="bar-list" id="moneyBars"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 02: DEMAND ============================ -->
+<section class="section fade-in" data-layer="demand" id="demand">
+  <div class="section-head">
+    <div class="section-num">02</div>
+    <div>
+      <div class="h2-meta">Спрос на инфраструктуру · карта дефицита</div>
+      <h2>Чего не хватает <em>рядом с домом</em></h2>
+      <p>Индекс дефицита — доля запросов на объект этого типа, для которых в 15 минутах от указанного места нет доступного варианта (нет вовсе, только платный, или всё занято). Считается из жалоб, вопросов «где поблизости…» и отзывов на картах, сверяется с реестром объектов. Чем светлее клетка, тем острее нехватка.</p>
+    </div>
+  </div>
+
+  <div class="demand-grid">
+    <div class="panel">
+      <h3>Районы × типы объектов</h3>
+      <div class="sublabel">индекс дефицита 0–100 · последние 28 дн</div>
+      <div class="heat-wrap"><table class="heat" id="heatTable"></table></div>
+      <div class="heat-legend">
+        <span>дефицит</span>
+        <span class="steps">
+          <span style="background: var(--heat-1);"></span>
+          <span style="background: var(--heat-2);"></span>
+          <span style="background: var(--heat-3);"></span>
+          <span style="background: var(--heat-4);"></span>
+          <span style="background: var(--heat-5);"></span>
+        </span>
+        <span>0 · 20 · 40 · 60 · 80 · 100</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Как это звучит</h3>
+      <div class="sublabel">типичные формулировки · перефразированы</div>
+      <div class="quote-list" id="quoteList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 03: EVENTS ============================ -->
+<section class="section fade-in" data-layer="events" id="events">
+  <div class="section-head">
+    <div class="section-num">03</div>
+    <div>
+      <div class="h2-meta">Районные события · кривые отклика</div>
+      <h2>Как прошло — <em>глазами жителей</em></h2>
+      <p>У каждого события — кривая упоминаний: разгон до старта (сколько о нём говорили заранее), всплеск в день события, полураспад (за сколько дней обсуждение уходит вдвое) и фон после — выше или ниже, чем было. Оценка — средний тон отзывов по шкале 1–5. Шкала упоминаний у всех карточек общая, чтобы события можно было сравнивать.</p>
+    </div>
+  </div>
+
+  <div class="events-grid" id="eventsGrid"></div>
+
+  <div class="callout">
+    <strong>Что повторяется</strong>
+    В четырёх событиях из шести главная жалоба — не про само событие, а про то, как о нём узнали: нет расписания, анонс пришёл в день старта, о перекрытиях не предупредили. Там, где разгон до старта слабый, доля «узнал поздно» выше, а оценка ниже. Это ведёт прямо в слой 04.
+  </div>
+</section>
+
+<!-- ============================ 04: INFO ============================ -->
+<section class="section fade-in" data-layer="info" id="info">
+  <div class="section-head">
+    <div class="section-num">04</div>
+    <div>
+      <div class="h2-meta">Доступность информации · обязывающие узлы</div>
+      <h2>Где жители <em>на самом деле</em> узнают о спорте</h2>
+      <p>Сеть каналов, через которые до людей доходит (или не доходит) информация о событиях и объектах. Размер узла — охват в районе. Золото — официальные источники; бирюза — каналы, куда анонсы приходят регулярно; пунктирное кольцо — каналы с большой аудиторией, где анонсов нет и вопросы «где узнать?» остаются без ответа. Именно они — узлы в суперпозиции.</p>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="network-stage">
+      <svg class="network-svg" id="networkSvg" viewBox="0 0 720 460" role="img" aria-label="Сеть информационных каналов района"></svg>
+    </div>
+    <div class="info-side">
+      <div class="legend-card">
+        <h4>Каналы</h4>
+        <div class="legend-row">
+          <span class="dot-label" style="background: var(--c4);"></span>
+          <span class="lbl-text">Официальный источник<small>3 канала · 245 тыс. охват</small></span>
+        </div>
+        <div class="legend-row">
+          <span class="dot-label" style="background: var(--c1);"></span>
+          <span class="lbl-text">Анонсы приходят регулярно<small>4 канала · 220 тыс. охват</small></span>
+        </div>
+        <div class="legend-row" style="color: var(--text-2);">
+          <span class="dot-label ring-dashed"></span>
+          <span class="lbl-text" style="color: var(--text);">Информационный разрыв<small>5 каналов · 510 тыс. охват</small></span>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Воронка участия</h3>
+        <div class="sublabel">от интереса до прихода · 6 событий</div>
+        <div class="bar-list" id="funnelBars"></div>
+      </div>
+      <div class="panel">
+        <h3>Вопросы без ответа</h3>
+        <div class="sublabel">46% вопросов в чатах без ответа за 24 ч</div>
+        <div class="bar-list" id="questionBars"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 05: SUBSTRATE ============================ -->
+<section class="section fade-in" data-layer="substrate">
+  <div class="section-head">
+    <div class="section-num">05</div>
+    <div>
+      <div class="h2-meta">Субстрат · медленные тренды предпочтений</div>
+      <h2>Сдвиг <em>словаря и норм</em></h2>
+      <p>Под всплесками — медленные изменения того, как люди вообще говорят о спорте. Они не дают пиков и не реагируют на отдельные события, но именно они решают, какой мир из слоя 01 в итоге победит. Линия — полгода, по неделям.</p>
+    </div>
+  </div>
+
+  <div class="trend-grid" id="trendGrid"></div>
+</section>
+
+<!-- ============================ 06: REFLEXIVITY ============================ -->
+<section class="section fade-in" data-layer="reflexivity">
+  <div class="section-head">
+    <div class="section-num">06</div>
+    <div>
+      <div class="h2-meta">Слой · рефлексия наблюдателя</div>
+      <h2>Город <em>тоже в корпусе</em></h2>
+      <p>«Мы» в этом примере — районная администрация и комитет по спорту. Наши анонсы, ответы и молчание сами становятся осколками. Этот слой показывает нашу долю в разговоре, чистоту данных и то, в какой слой вложить следующее усилие.</p>
+    </div>
+  </div>
+
+  <div class="reflexivity-grid">
+    <div class="refl-card mirror">
+      <div class="refl-tag">01 · self-presence и чистота данных</div>
+      <h3>Насколько мы слышны и насколько данным можно верить</h3>
+
+      <div class="refl-meter">
+        <div class="refl-meter-head">
+          <span class="refl-meter-label">Официальные сообщения в корпусе</span>
+          <span class="refl-meter-value">8<small style="font-size:11px;">%</small></span>
+        </div>
+        <div class="refl-meter-bar"><div class="refl-meter-bar-fill" style="width: 8%;"></div></div>
+        <div class="refl-meter-note">Жители обсуждают спорт почти без нас. Мы не искажаем картину, но и не отвечаем на вопросы.</div>
+      </div>
+
+      <div class="refl-meter">
+        <div class="refl-meter-head">
+          <span class="refl-meter-label">Накрутка и боты · отфильтровано</span>
+          <span class="refl-meter-value warn">6<small style="font-size:11px;color:var(--text-3);">%</small></span>
+        </div>
+        <div class="refl-meter-bar"><div class="refl-meter-bar-fill warm" style="width: 6%;"></div></div>
+        <div class="refl-meter-note">В основном — коммерческие клубы, продвигающие абонементы в районных пабликах. Вычитаются до расчёта миров.</div>
+      </div>
+
+      <div class="refl-meter">
+        <div class="refl-meter-head">
+          <span class="refl-meter-label">Расхождение с квартальным опросом</span>
+          <span class="refl-meter-value">7<small style="font-size:11px;"> п.п.</small></span>
+        </div>
+        <div class="refl-meter-bar"><div class="refl-meter-bar-fill kintsugi" style="width: 7%;"></div></div>
+        <div class="refl-meter-note">Соцсети громче опроса в недовольстве на 7 п.п. — поправка вносится в индекс настроений. Молчаливое большинство спокойнее.</div>
+      </div>
+    </div>
+
+    <div class="refl-card">
+      <div class="refl-tag">02 · counterfactual</div>
+      <h3>Оценка событий с анонсом в районных чатах и без</h3>
+      <div class="bar-list" id="counterBars" style="margin: 6px 0 16px;"></div>
+      <div class="refl-meter" style="margin-bottom: 0;">
+        <div class="refl-meter-head">
+          <span class="refl-meter-label">Δ оценки от раннего анонса</span>
+          <span class="refl-meter-value warn">+0.8</span>
+        </div>
+        <div class="refl-meter-note">События похожего формата, разница — в том, дошёл ли анонс в чаты ЖК и школ за 7+ дней. Пилот на 11 событиях, выборка мала — это гипотеза, а не закон.</div>
+      </div>
+    </div>
+
+    <div class="refl-card" style="grid-column: 1 / -1;">
+      <div class="refl-tag">03 · action leverage</div>
+      <h3>В какой слой вкладывать следующий ход</h3>
+
+      <div class="lever-grid">
+        <div class="lever-cell not-recommended">
+          <span class="lever-num">.24</span>
+          <div class="lever-name">Слой сигналов</div>
+          <div class="lever-desc">Больше постов в официальных пабликах. Дёшево, но аудитория разрыва их не видит.</div>
+          <span class="lever-pill">не сейчас</span>
+        </div>
+        <div class="lever-cell recommended">
+          <span class="lever-num">.74</span>
+          <div class="lever-name">Слой узлов</div>
+          <div class="lever-desc">Подключить чаты ЖК и родительские чаты школ к единой ленте анонсов. 510 тыс. охвата без новых каналов.</div>
+          <span class="lever-pill">главный рычаг</span>
+        </div>
+        <div class="lever-cell not-recommended">
+          <span class="lever-num">.58</span>
+          <div class="lever-name">Слой субстрата</div>
+          <div class="lever-desc">Дворовая инфраструктура в зонах дефицита. Долго и дорого, но задаёт победу мира M1.</div>
+          <span class="lever-pill">следом</span>
+        </div>
+      </div>
+
+      <div class="refl-recommendation">
+        <strong>Рекомендация системы</strong>
+        Подключить 40 крупнейших чатов ЖК и школ Невского и Фрунзенского районов к единой ленте анонсов за 10 дней до события: расписание, регистрация, возраст, перекрытия — одной карточкой. <em>Информационный разрыв дешевле закрыть, чем любой другой: каналы уже есть, аудитория уже спрашивает.</em> Параллельно — в план инфраструктуры: бассейн в Невском (дефицит 88) и освещение беговых троп в Приморском (64). Проверка через 6 недель: доля «узнал поздно» ниже 20%, оценка событий выше 4.0.
+      </div>
+    </div>
+
+    <div class="refl-card" style="grid-column: 1 / -1;">
+      <div class="refl-tag">04 · этика и данные</div>
+      <h3>Что мониторинг делает и чего не делает</h3>
+      <ul class="ethics-list">
+        <li><b>Только публичные источники:</b> открытые каналы, паблики, открытые чаты, отзывы на картах, обращения на городских порталах. Закрытые переписки не собираются.</li>
+        <li><b>Только агрегаты:</b> район × тема × неделя. Клетка показывается, если в ней не меньше 50 разных авторов. Профилей конкретных людей нет.</li>
+        <li><b>Цитаты перефразируются</b> и не ведут к автору. Транзакционные данные — только обезличенные агрегаты по району.</li>
+        <li><b>Калибровка опросом</b> раз в квартал: соцсети — это не всё население, и индекс поправляется на громкое меньшинство.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="foot-meta">
+    <span>Семантический движок · кв. дашборд инвертов · пример: мониторинг соцсетей</span>
+    <span>Раскладка на городском спортивном кейсе. Районы реальные, все цифры, события и цитаты — иллюстративные.</span>
+  </div>
+  <div class="foot-version">v 0.5 · 2026</div>
+</footer>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// ДАННЫЕ
+// ─────────────────────────────────────────────────────────────
+
+const WORLDS = [
+  { id: 'M1', code: 'NBR', name: 'Бесплатно и рядом с домом', color: 'var(--c3)',
+    desc: 'Дворовые площадки, парки, пробежки, воркаут, домашние тренировки. Спорт как часть маршрута дня, а не отдельная покупка.',
+    prob: 0.31, trend: 'up', trendVal: '+0.04' },
+  { id: 'M2', code: 'SUB', name: 'Фитнес-подписка', color: 'var(--c1)',
+    desc: 'Сетевые клубы, агрегаторы абонементов, приложения. Платят регулярно, но всё чаще сравнивают цену с бесплатной альтернативой.',
+    prob: 0.22, trend: 'down', trendVal: '−0.03' },
+  { id: 'M3', code: 'KID', name: 'Сначала — дети', color: 'var(--c4)',
+    desc: 'Семьи режут свои траты на спорт, но держат и расширяют секции для детей. Главный запрос — место и расписание.',
+    prob: 0.21, trend: 'up', trendVal: '+0.02' },
+  { id: 'M4', code: 'EVT', name: 'Событийный спорт', color: 'var(--c2)',
+    desc: 'Забеги, турниры, фестивали. Платят за участие и впечатление, а не за абонемент. Чувствительны к организации.',
+    prob: 0.16, trend: 'flat', trendVal: '+0.01' },
+  { id: 'M5', code: 'CUT', name: 'Экономия и отказ', color: 'var(--c5)',
+    desc: 'Спорт уходит из бюджета целиком. Маленькая доля, но её рост — ранний сигнал для всего рынка.',
+    prob: 0.10, trend: 'flat', trendVal: '−0.01' },
+];
+
+const WAVE_N = 29;           // точки через 2 дня: −28 … +28
+const NOW_IDX = 14;
+const dayAt = i => -28 + i * 2;
+const fmtDay = d => d === 0 ? 'сейчас' : (d < 0 ? `−${-d} дн` : `+${d} дн · прогноз`);
+
+const BINDING_SHARDS = [
+  { day: -26, actor: 'Агрегатор абонементов', desc: 'Отток подписок +9% после повышения цен — волна постов «перехожу на улицу»', impact: 'M2 −0.03', world: 'M2' },
+  { day: -22, actor: 'Чаты Приморского', desc: 'Петиция за освещение беговой тропы в парке — 2 400 подписей за неделю', impact: 'M1 +0.03', world: 'M1' },
+  { day: -18, actor: 'Спортшколы', desc: 'Листы ожидания в секции плавания выросли вдвое, родители ищут частные бассейны', impact: 'M3 +0.02', world: 'M3' },
+  { day: -12, actor: 'Регистрация на забег', desc: 'Слоты осеннего забега разобраны за 40 минут, 600 человек в листе ожидания', impact: 'M4 +0.03', world: 'M4' },
+  { day: -8,  actor: 'Маркетплейсы', desc: 'Продажи домашнего инвентаря в районах +14% м/м, всплеск отзывов «тренируюсь дома»', impact: 'M1 +0.02', world: 'M1' },
+  { day: -4,  actor: 'Банковские агрегаты', desc: 'Средний чек семьи на фитнес-клубы −6% м/м, траты на детские секции +3%', impact: 'M5 +0.02', world: 'M5' },
+  { day: -2,  actor: 'Воркаут в Калининском', desc: 'Очередь на новую площадку в первый вечер, 300+ фото в районных чатах', impact: 'M1 +0.02', world: 'M1' },
+];
+
+const EMOTIONS = [
+  { label: 'Интерес, планы', value: 31 },
+  { label: 'Раздражение (цены, очереди)', value: 24 },
+  { label: 'Радость, гордость', value: 19 },
+  { label: 'Ирония', value: 14 },
+  { label: 'Тревога о деньгах', value: 12 },
+];
+const MONEY_TOPICS = [
+  { label: 'Цены абонементов', value: 31 },
+  { label: 'Бесплатные площадки', value: 24 },
+  { label: 'Секции для детей', value: 19 },
+  { label: 'Экипировка и инвентарь', value: 14 },
+  { label: 'Дорога до объекта', value: 12 },
+];
+
+const TYPES = ['Бассейн', 'Беговые тропы', 'Воркаут', 'Мини-футбол', 'Каток', 'Лыжня', 'Памп-трек'];
+const DISTRICTS = [
+  { name: 'Приморский',     vol: 1840, v: [82, 64, 30, 45, 58, 40, 51] },
+  { name: 'Выборгский',     vol: 1320, v: [55, 38, 42, 50, 61, 22, 35] },
+  { name: 'Калининский',    vol: 1510, v: [71, 47, 18, 62, 44, 33, 57] },
+  { name: 'Невский',        vol: 1960, v: [88, 52, 35, 40, 70, 48, 29] },
+  { name: 'Красносельский', vol: 1180, v: [60, 29, 46, 58, 52, 19, 44] },
+  { name: 'Московский',     vol: 1050, v: [43, 57, 25, 37, 49, 55, 31] },
+  { name: 'Фрунзенский',    vol: 1270, v: [66, 61, 39, 71, 38, 42, 26] },
+  { name: 'Центральный',    vol:  990, v: [49, 73, 55, 34, 28, 64, 22] },
+];
+const QUOTES = [
+  { text: 'Ближайший бассейн — через весь район, и тот только платный.', where: 'Невский · бассейн · 88' },
+  { text: 'Бегаем по обочине: тропа в парке после шести вечера не освещена.', where: 'Приморский · беговые тропы · 64' },
+  { text: 'Поле во дворе школы есть, но записаться нельзя — всё занято секциями.', where: 'Фрунзенский · мини-футбол · 71' },
+  { text: 'Раньше каток заливали во дворе, теперь ездим в соседний район.', where: 'Невский · каток · 70' },
+  { text: 'Детям на великах и самокатах негде — только парковка у ТЦ.', where: 'Калининский · памп-трек · 57' },
+];
+
+const EVENTS = [
+  { name: 'Осенний забег вдоль залива', district: 'Приморский', ago: 24, people: '2 300 участников',
+    base: 60, pre: 1.8, spike: 7, half: 3, post: 1.3, csat: 4.4, late: 12, seed: 21,
+    plus: 'трасса вдоль воды, фото с финиша', minus: 'очередь за стартовыми номерами' },
+  { name: 'Фестиваль ГТО', district: 'Невский', ago: 19, people: '≈ 1 100 участников',
+    base: 45, pre: 1.2, spike: 3, half: 1, post: 0.9, csat: 3.6, late: 34, seed: 22,
+    plus: 'детская зона, бесплатные замеры', minus: 'расписания нет на сайте, ожидание 40+ минут' },
+  { name: 'Открытие воркаут-площадки', district: 'Калининский', ago: 15, people: '300+ фото за вечер',
+    base: 30, pre: 1.4, spike: 5, half: 6, post: 1.6, csat: 4.6, late: 9, seed: 23,
+    plus: 'освещение до 23:00, мягкое покрытие', minus: 'в вечерний пик мало турников' },
+  { name: 'Турнир дворовых команд', district: 'Фрунзенский', ago: 11, people: '16 команд',
+    base: 25, pre: 1.0, spike: 2.5, half: 2, post: 1.1, csat: 4.1, late: 41, seed: 24,
+    plus: 'судейство, призы младшим', minus: 'не анонсировали — «узнали по крикам со двора»' },
+  { name: 'Семейный велопарад', district: 'Центральный', ago: 7, people: '≈ 3 000 участников',
+    base: 70, pre: 1.5, spike: 4, half: 2, post: 0.8, csat: 3.3, late: 29, seed: 25,
+    plus: 'маршрут по набережным', minus: 'перекрытия улиц без предупреждения жителей' },
+  { name: 'День открытых дверей спортшкол', district: 'Красносельский', ago: 3, people: '14 школ',
+    base: 35, pre: 1.1, spike: 1.8, half: 1, post: 1.2, csat: 3.9, late: 38, seed: 26,
+    plus: 'бесплатные пробные занятия', minus: 'запись только по телефону, мест не хватило' },
+];
+
+// Каналы информации: type — official | linked | gap; reach — тыс. человек
+const CHANNELS = [
+  { id: 'O1', label: 'Портал района',        sub: 'official', x: 0.46, y: 0.40, reach: 35,  type: 'official', note: 'Публикует всё, но читают в основном те, кто уже в теме.' },
+  { id: 'O2', label: 'Сайт комспорта',       sub: 'official', x: 0.30, y: 0.16, reach: 20,  type: 'official', note: 'Полное расписание, но искать его — отдельный квест.' },
+  { id: 'O3', label: 'Госуслуги · push',     sub: 'official', x: 0.66, y: 0.14, reach: 190, type: 'official', note: 'Огромный охват, но спортивные анонсы идут редко и без района.' },
+  { id: 'L1', label: 'Паблик района ВК',     sub: 'linked',   x: 0.16, y: 0.44, reach: 60,  type: 'linked', lead: 5, note: 'Перепубликует анонсы портала за ~5 дней до события.' },
+  { id: 'L2', label: 'Спортшколы',           sub: 'linked',   x: 0.64, y: 0.56, reach: 12,  type: 'linked', lead: 10, note: 'Получают всё заранее, но говорят только со «своими» семьями.' },
+  { id: 'L3', label: 'Беговые и вело-клубы', sub: 'linked',   x: 0.86, y: 0.36, reach: 8,   type: 'linked', lead: 14, note: 'Узнают первыми — и первыми разбирают слоты.' },
+  { id: 'L4', label: 'Городские TG-каналы',  sub: 'linked',   x: 0.36, y: 0.62, reach: 140, type: 'linked', lead: 2, note: 'Берут только крупные события и в последний момент.' },
+  { id: 'G1', label: 'Районные TG-чаты',     sub: 'gap',      x: 0.12, y: 0.78, reach: 85,  type: 'gap', ask: 21, note: 'Главное место вопросов «что где будет?». Официальных анонсов нет.' },
+  { id: 'G2', label: 'Чаты ЖК и домов',      sub: 'gap',      x: 0.52, y: 0.84, reach: 160, type: 'gap', ask: 34, note: 'Здесь узнают о перекрытиях — обычно уже постфактум.' },
+  { id: 'G3', label: 'Родительские чаты',    sub: 'gap',      x: 0.84, y: 0.72, reach: 190, type: 'gap', ask: 29, note: 'Самый большой охват. Решения о секциях и выходных принимаются тут.' },
+  { id: 'G4', label: 'Доски УК у подъезда',  sub: 'gap',      x: 0.08, y: 0.14, reach: 45,  type: 'gap', ask: 6, note: 'Старшие жители. Анонсы доходят на бумаге, если доходят.' },
+  { id: 'G5', label: 'Блогеры-урбанисты',    sub: 'gap',      x: 0.93, y: 0.12, reach: 30,  type: 'gap', ask: 10, note: 'Формируют повестку про инфраструктуру, но не про события.' },
+];
+// solid — регулярный канал анонсов; weak — перепосты время от времени
+const LINKS = [
+  { a: 'O1', b: 'O2', type: 'solid' },
+  { a: 'O1', b: 'O3', type: 'solid' },
+  { a: 'O1', b: 'L1', type: 'solid' },
+  { a: 'O1', b: 'L4', type: 'solid' },
+  { a: 'O2', b: 'L2', type: 'solid' },
+  { a: 'O2', b: 'L3', type: 'solid' },
+  { a: 'L1', b: 'G1', type: 'weak' },
+  { a: 'L4', b: 'G2', type: 'weak' },
+  { a: 'L2', b: 'G3', type: 'weak' },
+  { a: 'L3', b: 'G5', type: 'weak' },
+];
+
+const FUNNEL = [
+  { label: 'Хотели бы участвовать', value: 100 },
+  { label: 'Узнали заранее (≥ 3 дн)', value: 64 },
+  { label: 'Нашли правила и регистрацию', value: 45 },
+  { label: 'Пришли или зарегистрировались', value: 31 },
+];
+const QUESTIONS = [
+  { label: '«Где расписание?»', value: 23 },
+  { label: '«Нужна ли регистрация?»', value: 19 },
+  { label: '«С какого возраста?»', value: 17 },
+  { label: '«Будут ли перекрытия?»', value: 14 },
+  { label: '«Бесплатно или платно?»', value: 12 },
+];
+
+const TRENDS = [
+  { id: 'S1', code: 'NEAR', name: '«Рядом с домом», «15 минут»', world: 'M1', from: 18, to: 29, unit: '%', seed: 31,
+    desc: 'Доля упоминаний спорта с гео-мотивом. Люди выбирают не вид спорта, а расстояние.' },
+  { id: 'S2', code: 'FREE', name: '«Бесплатно» как условие выбора', world: 'M5', from: 22, to: 31, unit: '%', seed: 32,
+    desc: 'Цена из аргумента превращается в фильтр. Растёт и в M1, и в M5 — развилка ещё не решена.' },
+  { id: 'S3', code: 'KIDS', name: 'Секция ребёнку ÷ спорт для себя', world: 'M3', from: 0.8, to: 1.3, unit: '×', seed: 33,
+    desc: 'Соотношение упоминаний. С весны о детском спорте говорят чаще, чем о своём.' },
+  { id: 'S4', code: 'TOGR', name: '«Вместе», «с соседями», «командой»', world: 'M4', from: 9, to: 15, unit: '%', seed: 34,
+    desc: 'Социальный мотив: спорт как повод для общения. Питает событийный мир.' },
+];
+
+// ─────────────────────────────────────────────────────────────
+// УТИЛИТЫ
+// ─────────────────────────────────────────────────────────────
+
+const NS = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+
+function resolveCSS(varRef) {
+  const tmp = document.createElement('div');
+  tmp.style.color = varRef;
+  document.body.appendChild(tmp);
+  const c = getComputedStyle(tmp).color;
+  tmp.remove();
+  return c;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// детерминированный шум, чтобы картинка не менялась от перезагрузки
+function seeded(seed) {
+  let s = seed % 2147483647;
+  if (s <= 0) s += 2147483646;
+  return () => (s = s * 16807 % 2147483647) / 2147483647;
+}
+
+function trendSeries(from, to, n, noise, seed) {
+  const r = seeded(seed);
+  return Array.from({ length: n }, (_, i) => {
+    const v = from + (to - from) * (i / (n - 1));
+    return (i === 0 || i === n - 1) ? v : v + (r() - 0.5) * 2 * noise;
+  });
+}
+
+const linePath = (xs, ys) => xs.map((x, i) => `${i ? 'L' : 'M'} ${x.toFixed(1)} ${ys[i].toFixed(1)}`).join(' ');
+
+const tooltip = $('tooltip');
+function showTooltip(e, html) {
+  tooltip.innerHTML = html;
+  tooltip.classList.add('visible');
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  const x = Math.min(e.clientX + 14, window.innerWidth - 300);
+  const y = Math.min(e.clientY + 14, window.innerHeight - 160);
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+function hideTooltip() {
+  tooltip.classList.remove('visible');
+}
+
+function svgPoint(svg, e) {
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(NS, tag);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  el.style.pointerEvents = 'none';
+  return el;
+}
+
+// Крестовина + подсказка по ближайшей точке ряда
+function attachHover(svg, xs, y1, y2, onIndex) {
+  const surface = resolveCSS('var(--surface)');
+  const cross = svgEl('line', { y1, y2, stroke: resolveCSS('var(--text-2)'), 'stroke-width': 1, opacity: 0 });
+  const dot = svgEl('circle', { r: 4, stroke: surface, 'stroke-width': 2, opacity: 0 });
+  const vb = svg.viewBox.baseVal;
+  const hit = document.createElementNS(NS, 'rect');
+  Object.entries({ x: 0, y: 0, width: vb.width, height: vb.height, fill: 'transparent' })
+    .forEach(([k, v]) => hit.setAttribute(k, v));
+  hit.style.cursor = 'crosshair';
+  svg.append(cross, dot, hit);
+
+  hit.addEventListener('mousemove', e => {
+    const p = svgPoint(svg, e);
+    let best = 0;
+    for (let i = 1; i < xs.length; i++) if (Math.abs(xs[i] - p.x) < Math.abs(xs[best] - p.x)) best = i;
+    const r = onIndex(best);
+    cross.setAttribute('x1', xs[best]);
+    cross.setAttribute('x2', xs[best]);
+    cross.setAttribute('opacity', 0.5);
+    if (r.y != null) {
+      dot.setAttribute('cx', xs[best]);
+      dot.setAttribute('cy', r.y);
+      dot.setAttribute('fill', r.color);
+      dot.setAttribute('opacity', 1);
+    } else {
+      dot.setAttribute('opacity', 0);
+    }
+    showTooltip(e, r.html);
+  });
+  hit.addEventListener('mouseleave', () => {
+    cross.setAttribute('opacity', 0);
+    dot.setAttribute('opacity', 0);
+    hideTooltip();
+  });
+}
+
+function renderSpark(svg, values, color, fmt, labelAt) {
+  const W = 240, H = 40, p = 5;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const min = Math.min(...values), max = Math.max(...values), span = (max - min) || 1;
+  const xs = values.map((_, i) => p + i * (W - 2 * p) / (values.length - 1));
+  const ys = values.map(v => H - p - (v - min) / span * (H - 2 * p));
+  const c = resolveCSS(color);
+  const d = linePath(xs, ys);
+  svg.innerHTML = `
+    <path d="${d} L ${xs.at(-1)} ${H - p} L ${xs[0]} ${H - p} Z" fill="${c}" opacity="0.12" />
+    <path d="${d}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+    <circle cx="${xs.at(-1)}" cy="${ys.at(-1)}" r="4" fill="${c}" stroke="${resolveCSS('var(--surface)')}" stroke-width="2" />
+  `;
+  attachHover(svg, xs, p, H - p, i => ({
+    y: ys[i], color: c,
+    html: `<div class="tt-meta">${labelAt(i)}</div><div class="tt-strong">${fmt(values[i])}</div>`,
+  }));
+}
+
+function renderBars(el, rows, color, { max = 100, fmt = v => v + '%' } = {}) {
+  el.innerHTML = rows.map(r => `
+    <div class="bar-row">
+      <span class="bar-label">${r.label}</span>
+      <span class="bar-track"><span class="bar-fill" style="width: ${(r.value / max * 100).toFixed(1)}%; background: ${color};"></span></span>
+      <span class="bar-val">${fmt(r.value)}</span>
+    </div>
+  `).join('');
+}
+
+const worldById = id => WORLDS.find(w => w.id === id);
+const swatch = color => `<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${color};margin-right:6px;"></span>`;
+
+// ─────────────────────────────────────────────────────────────
+// 00: PULSE
+// ─────────────────────────────────────────────────────────────
+
+const KPIS = [
+  { href: '#consumer', color: 'var(--c4)', label: 'Потребительские настроения', value: '54', unit: '/100',
+    delta: '↓ 3 пункта за 4 нед', note: 'Индекс тона упоминаний трат на спорт. Главный раздражитель — цены абонементов.',
+    series: trendSeries(57, 54, 28, 0.8, 11), fmt: v => v.toFixed(0) + ' / 100' },
+  { href: '#demand', color: 'var(--c3)', label: 'Спрос на инфраструктуру', value: '38', unit: '%',
+    delta: '↑ 4 п.п. за 4 нед', note: 'Доля запросов на объект, которого нет в 15 минутах от дома.',
+    series: trendSeries(34, 38, 28, 0.7, 12), fmt: v => v.toFixed(1) + '%' },
+  { href: '#events', color: 'var(--c2)', label: 'Удовлетворённость событиями', value: '3.8', unit: '/5',
+    delta: '↑ 0.2 за 4 нед', note: 'Средний тон отзывов о 6 районных событиях месяца.',
+    series: trendSeries(3.6, 3.8, 28, 0.06, 13), fmt: v => v.toFixed(2) + ' / 5' },
+  { href: '#info', color: 'var(--c5)', label: 'Доступность информации', value: '27', unit: '%',
+    delta: '↓ 2 п.п. за 4 нед', note: 'Упоминаний событий со словами «не знал», «узнал поздно», «где посмотреть».',
+    series: trendSeries(29, 27, 28, 0.9, 14), fmt: v => v.toFixed(1) + '%' },
+];
+
+function renderPulse() {
+  const grid = $('pulseGrid');
+  grid.innerHTML = '';
+  KPIS.forEach(k => {
+    const a = document.createElement('a');
+    a.className = 'kpi-tile';
+    a.href = k.href;
+    a.style.setProperty('--kpi-color', k.color);
+    a.innerHTML = `
+      <span class="kpi-label"><span class="sw"></span>${k.label}</span>
+      <span class="kpi-value">${k.value}<small>${k.unit}</small></span>
+      <span class="kpi-delta">${k.delta}</span>
+      <span class="kpi-note">${k.note}</span>
+      <svg class="kpi-spark" role="img" aria-label="${k.label}: динамика за 28 дней"></svg>
+    `;
+    grid.appendChild(a);
+    renderSpark(a.querySelector('svg'), k.series, k.color, k.fmt,
+      i => i === k.series.length - 1 ? 'сегодня' : `−${k.series.length - 1 - i} дн`);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// 01: CONSUMER — WAVE FUNCTION
+// ─────────────────────────────────────────────────────────────
+
+function generateWaveData() {
+  const r = seeded(7);
+  const start = [0.20, 0.27, 0.18, 0.15, 0.12];
+  const current = WORLDS.map(w => w.prob);
+  const trends = [0.04, -0.03, 0.02, 0.01, -0.01]; // в неделю
+  const series = WORLDS.map(() => []);
+  for (let i = 0; i < WAVE_N; i++) {
+    let row;
+    if (i <= NOW_IDX) {
+      const u = i / NOW_IDX;
+      row = start.map((s, w) => s * (1 - u) + current[w] * u + (i > 0 && i < NOW_IDX ? (r() - 0.5) * 0.02 : 0));
+    } else {
+      const u = (i - NOW_IDX) / (WAVE_N - 1 - NOW_IDX);
+      row = current.map((c, w) => Math.max(0.02, c + trends[w] * u * 2.5));
+    }
+    const sum = row.reduce((a, b) => a + b, 0);
+    row.forEach((v, w) => series[w].push(v / sum));
+  }
+  return series;
+}
+const WAVE_SERIES = generateWaveData();
+
+function renderWorldList() {
+  const list = $('worldList');
+  list.innerHTML = '';
+  WORLDS.forEach(w => {
+    const arrow = w.trend === 'up' ? '↑' : (w.trend === 'down' ? '↓' : '→');
+    const item = document.createElement('div');
+    item.className = 'world-item';
+    item.style.setProperty('--world-color', w.color);
+    item.innerHTML = `
+      <div class="world-item-head">
+        <span class="world-id">${w.id} · ${w.code}</span>
+        <span class="world-prob">${(w.prob * 100).toFixed(0)}<small>%</small></span>
+      </div>
+      <div class="world-name">${w.name}</div>
+      <div class="world-desc">${w.desc}</div>
+      <span class="world-trend ${w.trend}">${arrow} ${w.trendVal}/нед</span>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function renderWaveSvg() {
+  const svg = $('waveSvg');
+  const W = 920, H = 320;
+  const padL = 16, padR = 64, padT = 30, padB = 26;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const xAt = i => padL + (i / (WAVE_N - 1)) * innerW;
+  const yAt = v => padT + v * innerH;
+  const surface = resolveCSS('var(--surface)');
+  const textC = resolveCSS('var(--text)');
+  const mutedC = resolveCSS('var(--text-3)');
+  const goldC = resolveCSS('var(--kintsugi)');
+
+  const cum = [];
+  for (let i = 0; i < WAVE_N; i++) {
+    let acc = 0;
+    cum.push(WORLDS.map((_, w) => { const s = acc; acc += WAVE_SERIES[w][i]; return { s, e: acc }; }));
+  }
+  const band = (w, from, to) => {
+    let d = '';
+    for (let i = from; i <= to; i++) d += `${i === from ? 'M' : 'L'} ${xAt(i)} ${yAt(cum[i][w].s)} `;
+    for (let i = to; i >= from; i--) d += `L ${xAt(i)} ${yAt(cum[i][w].e)} `;
+    return d + 'Z';
+  };
+
+  let html = '';
+  WORLDS.forEach((world, w) => {
+    const c = resolveCSS(world.color);
+    // 2px поверхностный зазор между поясами
+    html += `<path d="${band(w, 0, NOW_IDX)}" fill="${c}" fill-opacity="0.72" stroke="${surface}" stroke-width="2" stroke-linejoin="round" />`;
+    html += `<path d="${band(w, NOW_IDX, WAVE_N - 1)}" fill="${c}" fill-opacity="0.3" stroke="${surface}" stroke-width="2" stroke-linejoin="round" />`;
+  });
+
+  const nowX = xAt(NOW_IDX);
+  html += `
+    <line x1="${nowX}" y1="${padT}" x2="${nowX}" y2="${H - padB}" stroke="${goldC}" stroke-width="1" stroke-dasharray="3 4" class="now-line" />
+    <text x="${nowX}" y="${padT - 18}" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="${goldC}" letter-spacing="1">СЕЙЧАС</text>
+    <text x="${padL}" y="${H - 8}" font-family="var(--mono)" font-size="9" fill="${mutedC}">−28 дн</text>
+    <text x="${padL + innerW}" y="${H - 8}" text-anchor="end" font-family="var(--mono)" font-size="9" fill="${mutedC}">+28 дн · прогноз</text>
+  `;
+
+  // Прямые подписи миров справа, у конца прогноза
+  WORLDS.forEach((world, w) => {
+    const last = cum[WAVE_N - 1][w];
+    const y = yAt((last.s + last.e) / 2);
+    html += `
+      <rect x="${padL + innerW + 8}" y="${y - 4}" width="8" height="8" rx="2" fill="${resolveCSS(world.color)}" />
+      <text x="${padL + innerW + 20}" y="${y + 3}" font-family="var(--mono)" font-size="9" fill="${textC}">${world.id}</text>
+    `;
+  });
+
+  // Обязывающие осколки — маркеры над графиком
+  BINDING_SHARDS.forEach(s => {
+    const i = (s.day + 28) / 2;
+    const x = xAt(i);
+    const c = resolveCSS(worldById(s.world).color);
+    html += `
+      <line x1="${x}" y1="${padT}" x2="${x}" y2="${padT - 6}" stroke="${c}" stroke-width="1" />
+      <circle cx="${x}" cy="${padT - 8}" r="4" fill="${c}" stroke="${surface}" stroke-width="2" />
+    `;
+  });
+
+  svg.innerHTML = html;
+
+  const xs = Array.from({ length: WAVE_N }, (_, i) => xAt(i));
+  attachHover(svg, xs, padT, H - padB, i => {
+    const shards = BINDING_SHARDS.filter(s => Math.round((s.day + 28) / 2) === i);
+    const rows = WORLDS.map((wd, w) => `
+      <div style="display:flex;align-items:center;gap:6px;">
+        ${swatch(wd.color)}<span style="flex:1;">${wd.id} ${wd.name}</span>
+        <b style="font-weight:500;">${(WAVE_SERIES[w][i] * 100).toFixed(0)}%</b>
+      </div>`).join('');
+    const shardHtml = shards.map(s => `
+      <div style="margin-top:6px;padding-top:6px;border-top:0.5px solid var(--border-strong);">
+        <b style="font-weight:500;">${s.actor}:</b> ${escapeHtml(s.desc)}
+      </div>`).join('');
+    return { html: `<div class="tt-meta">${fmtDay(dayAt(i))}</div>${rows}${shardHtml}` };
+  });
+}
+
+function renderBindingShardsList() {
+  const list = $('bindingShardsList');
+  list.innerHTML = '';
+  BINDING_SHARDS.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'binding-shard-row';
+    row.style.setProperty('--shard-color', worldById(s.world).color);
+    row.innerHTML = `
+      <span class="ts">−${-s.day} дн</span>
+      <span class="actor">${s.actor}</span>
+      <span class="desc">${escapeHtml(s.desc)}</span>
+      <span class="impact" style="color: var(--text);">${s.impact}</span>
+    `;
+    list.appendChild(row);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// 02: DEMAND — HEATMAP
+// ─────────────────────────────────────────────────────────────
+
+const HEAT = ['var(--heat-1)', 'var(--heat-2)', 'var(--heat-3)', 'var(--heat-4)', 'var(--heat-5)'];
+const heatBin = v => Math.min(4, Math.floor(v / 20));
+
+function renderHeatmap() {
+  const table = $('heatTable');
+  let html = '<thead><tr><th></th>' + TYPES.map(t => `<th>${t}</th>`).join('') + '<th style="text-align:right;">упом./нед</th></tr></thead><tbody>';
+  DISTRICTS.forEach((d, r) => {
+    html += `<tr><th class="row" scope="row">${d.name}</th>`;
+    d.v.forEach((v, c) => {
+      const b = heatBin(v);
+      html += `<td class="cell" data-r="${r}" data-c="${c}" style="background:${HEAT[b]};color:${b >= 3 ? 'var(--bg)' : 'var(--text)'};">${v}</td>`;
+    });
+    html += `<td class="vol">${d.vol.toLocaleString('ru-RU')}</td></tr>`;
+  });
+  table.innerHTML = html + '</tbody>';
+
+  table.querySelectorAll('td.cell').forEach(td => {
+    td.addEventListener('mouseenter', e => {
+      const d = DISTRICTS[+td.dataset.r];
+      const c = +td.dataset.c;
+      const v = d.v[c];
+      const level = v >= 80 ? 'острый дефицит' : v >= 60 ? 'заметный дефицит' : v >= 40 ? 'умеренный' : 'в основном закрыт';
+      const rank = [...DISTRICTS].sort((a, b) => b.v[c] - a.v[c]).indexOf(d) + 1;
+      showTooltip(e, `
+        <div class="tt-meta">${d.name} · ${TYPES[c]}</div>
+        <div class="tt-strong">Дефицит ${v} / 100 — ${level}</div>
+        <div>${rank}-е место из 8 районов по этому типу</div>
+        <div style="opacity:0.8;">Всего упоминаний спорта в районе: ${d.vol.toLocaleString('ru-RU')}/нед</div>
+      `);
+    });
+    td.addEventListener('mousemove', moveTooltip);
+    td.addEventListener('mouseleave', hideTooltip);
+  });
+}
+
+function renderQuotes() {
+  $('quoteList').innerHTML = QUOTES.map(q => `<div class="quote">${q.text}<small>${q.where}</small></div>`).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
+// 03: EVENTS — RESPONSE CURVES
+// ─────────────────────────────────────────────────────────────
+
+const EV_FROM = -3, EV_TO = 10;
+
+function eventSeries(ev) {
+  const r = seeded(ev.seed);
+  const out = [];
+  for (let d = EV_FROM; d <= Math.min(EV_TO, ev.ago); d++) {
+    const v = d < 0
+      ? ev.base * (1 + (ev.pre - 1) * (d + 4) / 3)
+      : ev.base * ev.post + ev.base * (ev.spike - ev.post) * Math.pow(0.5, d / ev.half);
+    out.push({ d, v: Math.max(0, v * (d === 0 ? 1 : 1 + (r() - 0.5) * 0.12)) });
+  }
+  return out;
+}
+
+function renderEvents() {
+  const grid = $('eventsGrid');
+  grid.innerHTML = '';
+  const all = EVENTS.map(eventSeries);
+  const yMax = Math.max(...all.flat().map(p => p.v)) * 1.08;
+  const color = resolveCSS('var(--c2)');
+  const muted = resolveCSS('var(--text-3)');
+  const W = 300, H = 84, pL = 4, pR = 4, pT = 6, pB = 14;
+  const xAt = d => pL + (d - EV_FROM) / (EV_TO - EV_FROM) * (W - pL - pR);
+  const yAt = v => H - pB - v / yMax * (H - pT - pB);
+
+  EVENTS.forEach((ev, k) => {
+    const pts = all[k];
+    const card = document.createElement('div');
+    card.className = 'event-card';
+    const post = Math.round((ev.post - 1) * 100);
+    card.innerHTML = `
+      <div class="event-head">
+        <div>
+          <div class="event-meta">${ev.district} · −${ev.ago} дн · ${ev.people}</div>
+          <div class="event-name">${ev.name}</div>
+        </div>
+        <div class="event-csat">${ev.csat.toFixed(1)}<small>/5</small></div>
+      </div>
+      <svg class="event-spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Упоминания события по дням"></svg>
+      <div class="event-metrics">
+        <div class="event-metric"><span class="m-label">всплеск</span><span class="m-val">×${ev.spike}</span></div>
+        <div class="event-metric"><span class="m-label">полураспад</span><span class="m-val">${ev.half} дн</span></div>
+        <div class="event-metric"><span class="m-label">фон после</span><span class="m-val">${post > 0 ? '+' : (post < 0 ? '−' : '')}${Math.abs(post)}%</span></div>
+        <div class="event-metric"><span class="m-label">узнал поздно</span><span class="m-val">${ev.late >= 30 ? '▲ ' : ''}${ev.late}%</span></div>
+      </div>
+      <div class="event-notes"><b>Хвалят:</b> ${ev.plus}.<br><b>Жалуются:</b> ${ev.minus}.</div>
+    `;
+    grid.appendChild(card);
+
+    const svg = card.querySelector('svg');
+    const xs = pts.map(p => xAt(p.d));
+    const ys = pts.map(p => yAt(p.v));
+    const d = linePath(xs, ys);
+    let html = `
+      <line x1="${pL}" y1="${yAt(ev.base)}" x2="${W - pR}" y2="${yAt(ev.base)}" stroke="${muted}" stroke-width="0.8" stroke-dasharray="2 3" />
+      <line x1="${xAt(0)}" y1="${pT}" x2="${xAt(0)}" y2="${H - pB}" stroke="${muted}" stroke-width="0.8" stroke-dasharray="2 3" />
+      <path d="${d} L ${xs.at(-1)} ${H - pB} L ${xs[0]} ${H - pB} Z" fill="${color}" opacity="0.16" />
+      <path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+      <text x="${xAt(0) + 4}" y="${pT + 7}" font-family="var(--mono)" font-size="8" fill="${muted}">старт</text>
+      <text x="${W - pR}" y="${yAt(ev.base) - 3}" text-anchor="end" font-family="var(--mono)" font-size="8" fill="${muted}">фон</text>
+      <text x="${pL}" y="${H - 3}" font-family="var(--mono)" font-size="8" fill="${muted}">−3 дн</text>
+      <text x="${W - pR}" y="${H - 3}" text-anchor="end" font-family="var(--mono)" font-size="8" fill="${muted}">+10 дн</text>
+    `;
+    if (ev.ago < EV_TO) {
+      html += `<text x="${(xs.at(-1) + W - pR) / 2}" y="${(pT + H - pB) / 2}" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="${muted}">отклик ещё идёт</text>`;
+    }
+    svg.innerHTML = html;
+    attachHover(svg, xs, pT, H - pB, i => ({
+      y: ys[i], color,
+      html: `<div class="tt-meta">${pts[i].d === 0 ? 'день события' : (pts[i].d < 0 ? `за ${-pts[i].d} дн до` : `+${pts[i].d} дн после`)}</div>
+             <div class="tt-strong">${Math.round(pts[i].v)} упоминаний</div>
+             <div style="opacity:0.8;">фон района — ${ev.base}/день</div>`,
+    }));
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// 04: INFO — CHANNEL NETWORK
+// ─────────────────────────────────────────────────────────────
+
+function renderNetwork() {
+  const svg = $('networkSvg');
+  const W = 720, H = 460, pad = 44;
+  const xAt = nx => pad + nx * (W - pad * 2);
+  const yAt = ny => pad + ny * (H - pad * 2);
+  const rOf = n => 8 + Math.sqrt(n.reach) * 2.1;
+  const gold = resolveCSS('var(--c4)');
+  const teal = resolveCSS('var(--c1)');
+  const grey = resolveCSS('var(--text-2)');
+  const muted = resolveCSS('var(--text-3)');
+  const surface = resolveCSS('var(--surface)');
+  const byId = id => CHANNELS.find(c => c.id === id);
+
+  let html = '';
+  LINKS.forEach(l => {
+    const a = byId(l.a), b = byId(l.b);
+    html += `<line x1="${xAt(a.x)}" y1="${yAt(a.y)}" x2="${xAt(b.x)}" y2="${yAt(b.y)}"
+      stroke="${l.type === 'solid' ? gold : muted}" stroke-width="${l.type === 'solid' ? 1.6 : 1}"
+      ${l.type === 'weak' ? 'stroke-dasharray="3 4"' : ''} opacity="${l.type === 'solid' ? 0.55 : 0.7}" />`;
+  });
+
+  CHANNELS.forEach(n => {
+    const x = xAt(n.x), y = yAt(n.y), r = rOf(n);
+    if (n.type === 'gap') {
+      html += `
+        <circle cx="${x}" cy="${y}" r="${r}" fill="rgba(232,227,216,0.04)" stroke="${grey}" stroke-width="1.2" stroke-dasharray="4 3" class="node-circle" data-id="${n.id}" />
+        <circle cx="${x}" cy="${y}" r="${r * 0.36}" fill="${grey}" opacity="0.5" style="pointer-events:none;" />`;
+    } else {
+      const c = n.type === 'official' ? gold : teal;
+      html += `
+        <circle cx="${x}" cy="${y}" r="${r + 4}" fill="${c}" opacity="0.15" style="pointer-events:none;" />
+        <circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="${surface}" stroke-width="2" class="node-circle" data-id="${n.id}" />`;
+    }
+    html += `
+      <text x="${x}" y="${y + r + 13}" text-anchor="middle" class="node-label">${n.label}</text>
+      <text x="${x}" y="${y + r + 23}" text-anchor="middle" class="node-sublabel">${n.reach} тыс.</text>`;
+  });
+  svg.innerHTML = html;
+
+  svg.querySelectorAll('.node-circle').forEach(circ => {
+    circ.addEventListener('mouseenter', e => {
+      const n = byId(circ.getAttribute('data-id'));
+      const status = n.type === 'official' ? 'официальный источник'
+        : n.type === 'linked' ? `анонсы приходят за ~${n.lead} дн`
+        : `анонсов нет · ${n.ask}% всех вопросов «где узнать?»`;
+      showTooltip(e, `
+        <div class="tt-meta">${n.id} · охват ${n.reach} тыс.</div>
+        <div class="tt-strong">${n.label}</div>
+        <div>${status}</div>
+        <div style="margin-top:4px;opacity:0.8;">${n.note}</div>
+      `);
+    });
+    circ.addEventListener('mousemove', moveTooltip);
+    circ.addEventListener('mouseleave', hideTooltip);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// 05: SUBSTRATE — PREFERENCE TRENDS
+// ─────────────────────────────────────────────────────────────
+
+function renderTrends() {
+  const grid = $('trendGrid');
+  grid.innerHTML = '';
+  TRENDS.forEach(t => {
+    const world = worldById(t.world);
+    const isRatio = t.unit === '×';
+    const fmt = v => isRatio ? v.toFixed(2) + '×' : v.toFixed(1) + '%';
+    const series = trendSeries(t.from, t.to, 26, isRatio ? 0.04 : 0.8, t.seed);
+    const card = document.createElement('div');
+    card.className = 'substrate-card trend-card';
+    card.style.setProperty('--sub-color', world.color);
+    card.innerHTML = `
+      <div class="sub-head">
+        <span class="sub-id">${t.id} · ${t.code}</span>
+        <span class="sub-depth">${isRatio ? t.to.toFixed(1) : t.to}<small>${t.unit}</small></span>
+      </div>
+      <div class="sub-name">${t.name}</div>
+      <svg class="sub-spark" role="img" aria-label="${t.name}: динамика за 26 недель"></svg>
+      <div class="sub-arrow">было ${isRatio ? t.from.toFixed(1) : t.from}${t.unit} полгода назад · ведёт к миру: <b>${world.id} ${world.name}</b></div>
+      <div style="font-size:11px; color:var(--text-2); line-height:1.45; margin-top:2px;">${t.desc}</div>
+    `;
+    grid.appendChild(card);
+    renderSpark(card.querySelector('svg'), series, world.color, fmt,
+      i => i === series.length - 1 ? 'эта неделя' : `−${series.length - 1 - i} нед`);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────
+
+renderPulse();
+renderWorldList();
+renderWaveSvg();
+renderBindingShardsList();
+renderBars($('emotionBars'), EMOTIONS, 'var(--c4)');
+renderBars($('moneyBars'), MONEY_TOPICS, 'var(--c4)');
+renderHeatmap();
+renderQuotes();
+renderEvents();
+renderNetwork();
+renderBars($('funnelBars'), FUNNEL, 'var(--c5)');
+renderBars($('questionBars'), QUESTIONS, 'var(--c5)', { max: 30 });
+renderTrends();
+renderBars($('counterBars'), [
+  { label: 'Анонс дошёл в чаты за 7+ дней', value: 4.3 },
+  { label: 'Анонса в чатах не было', value: 3.5 },
+], 'var(--reflexive)', { max: 5, fmt: v => v.toFixed(1) + ' / 5' });
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
