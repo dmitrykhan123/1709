@@ -1197,10 +1197,10 @@ footer {
 /* Тепловая карта спроса */
 .demand-grid {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: minmax(0, 1fr) 300px;
   gap: 16px;
 }
-@media (max-width: 980px) { .demand-grid { grid-template-columns: 1fr; } }
+@media (max-width: 980px) { .demand-grid { grid-template-columns: minmax(0, 1fr); } }
 .heat-wrap { overflow-x: auto; }
 table.heat {
   border-collapse: separate;
@@ -1407,7 +1407,7 @@ table.heat td.vol {
 <!-- ============================ HERO ============================ -->
 <section class="hero fade-in">
   <div class="hero-tag">Дашборд II · пример раскладки · мониторинг соцсетей</div>
-  <h1>Город в <em>суперпозиции</em>:<br>как жители выбирают спорт</h1>
+  <h1>Занятие 22</h1>
   <p class="hero-lede">Квантовая раскладка, приложенная к слушанию соцсетей. Настроение горожан — не одна цифра «довольны на 62%», а распределение по сценариям того, куда уходят их деньги, время и ожидания от спорта. Осколки — посты, отзывы и вопросы в районных чатах; обязывающие осколки — действия: подписи, регистрации, отказы от абонементов. Четыре вопроса к городу: что с тратами, чего не хватает рядом с домом, как прошли районные события и дошла ли до людей информация.</p>
 
   <div class="paradigm-shift">
