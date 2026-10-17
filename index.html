@@ -196,7 +196,7 @@ body.dragging:not([data-screen="start"])::after {
 
 /* ---------- вкладки ---------- */
 
-.tabs { display: flex; gap: 2px; margin: 18px 0 18px; border-bottom: 1px solid var(--rule); overflow-x: auto; scrollbar-width: thin; }
+.tabs { display: flex; gap: 2px; margin: 18px 0 18px; border-bottom: 1px solid var(--rule); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
 .tabs [role="tab"] {
   border: 0; background: none; padding: 10px 14px; cursor: pointer; color: var(--muted); font-weight: 550; white-space: nowrap;
   border-bottom: 2px solid transparent; margin-bottom: -1px;
@@ -416,7 +416,14 @@ details.more[open] > summary { margin-bottom: 8px; }
 @media (max-width: 860px) {
   main { padding: 0 14px 32px; }
   .topbar { padding: 12px 14px; gap: 12px; }
-  .start { grid-template-columns: 1fr; gap: 32px; padding-top: 16px; }
+  .start { grid-template-columns: 1fr; gap: 0; padding-top: 16px; }
+  /* на узком экране зона загрузки идёт сразу после короткого описания */
+  .start-copy { display: contents; }
+  .start h1 { order: 1; }
+  .start .lead { order: 2; }
+  .privacy { order: 3; margin-bottom: 24px; }
+  .drop { order: 4; }
+  .columns-hint { order: 5; margin-top: 32px; }
   .file-bar { margin-left: 0; }
   .map-row { grid-template-columns: 1fr; gap: 4px; }
   .f-reset { margin-left: 0; }
@@ -437,7 +444,7 @@ details.more[open] > summary { margin-bottom: 8px; }
 
 </style>
 </head>
-<body data-autoload="overview">
+<body>
   <a class="skip" href="#main">Перейти к содержимому</a>
 
   <header class="topbar">
@@ -1057,7 +1064,7 @@ function compact(v) {
   if (!Number.isFinite(v)) return '';
   const a = Math.abs(v);
   if (a >= 1e9) return num(v / 1e9, 1) + ' млрд';
-  if (a >= 1e6) return num(v / 1e6, a >= 1e7 ? 0 : 1) + ' млн';
+  if (a >= 1e6) return num(v / 1e6, a >= 1e8 ? 0 : 1) + ' млн';
   if (a >= 1e3) return num(v / 1e3, 0) + ' тыс.';
   return num(v, 0);
 }
@@ -1788,6 +1795,9 @@ function dataTable(columns, opts) {
       }
     }
     const shown = st.all ? list : list.slice(0, limit);
+    // полоски в ячейках — относительно максимума столбца, чтобы различия были видны
+    const barMax = {};
+    for (const c of columns) if (c.bar) barMax[c.key] = rows.reduce((m, r) => { const x = value(c, r); return Number.isFinite(x) && x > m ? x : m; }, 1e-12);
     const table = h('table', { class: 'data' },
       caption ? h('caption', { class: 'vh', text: caption }) : null,
       h('thead', null, h('tr', null, columns.map((c) => {
@@ -1813,7 +1823,7 @@ function dataTable(columns, opts) {
           if (c.type === 'delta' && Number.isFinite(v)) cls.push(v > 0 ? 'up' : v < 0 ? 'down' : '');
           const td = h('td', { class: cls.join(' ').trim() || null });
           if (c.bar && Number.isFinite(v)) {
-            td.append(h('span', { class: 'cell-bar' }, h('span', { class: 'cell-bar-fill', style: { width: Math.max(0, Math.min(1, v)) * 100 + '%' } })));
+            td.append(h('span', { class: 'cell-bar' }, h('span', { class: 'cell-bar-fill', style: { width: Math.max(0, Math.min(1, v / barMax[c.key])) * 100 + '%' } })));
           }
           td.append(document.createTextNode(fmt(c.type, v)));
           return td;
@@ -3213,7 +3223,7 @@ function forecastView(ctx, after) {
     }));
     const hi = S.indexOf(Math.max(...S)), lo = S.indexOf(Math.min(...S));
     seasonBlock = block('Сезонность', { sub: 'индекс месяца: 1,0 — средний месяц' },
-      h('p', { class: 'facts' }, 'Пик продаж — ', h('b', { text: monthOfYearName(hi) }), ` (в ${num(S[hi], 2)} раза выше среднего), спад — `, h('b', { text: monthOfYearName(lo) }), ` (${num(S[lo], 2)} от среднего).`),
+      h('p', { class: 'facts' }, 'Пик продаж — ', h('b', { text: monthOfYearName(hi) }), `: индекс ${num(S[hi], 2)}, на ${pct(S[hi] - 1, 0)} выше среднего месяца. Спад — `, h('b', { text: monthOfYearName(lo) }), `: индекс ${num(S[lo], 2)}, на ${pct(1 - S[lo], 0)} ниже среднего.`),
       sBox);
   }
 
@@ -3477,10 +3487,10 @@ async function loadBytes(u8, name) {
       throw new UserError('Формат .xls (Excel 97–2003) не поддерживается. Откройте файл в Excel и сохраните как «Книга Excel (.xlsx)».');
     }
     const isZip = u8[0] === 0x50 && u8[1] === 0x4b;
+    if ((ext === 'xlsx' || ext === 'xlsm') && !isZip) {
+      throw new UserError('Файл не похож на книгу Excel: возможно, он повреждён или это другой формат с расширением .xlsx. Откройте его в Excel и сохраните заново.');
+    }
     if (ext === 'csv' || ext === 'txt' || !isZip) {
-      if (!isZip && ext !== 'csv' && ext !== 'txt') {
-        // не ZIP и не CSV по расширению — пробуем как текст, но предупреждаем при неудаче
-      }
       const { rows } = parseCSV(decodeText(u8));
       app.book = null;
       app.sheetName = null;
